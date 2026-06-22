@@ -1,0 +1,66 @@
+{
+  "lockVersion": "1.0",
+  "settings": {
+    "resolveConflict": true,
+    "resolveConflictStrict": false,
+    "installAll": true
+  },
+  "overrides": {},
+  "overrideDependencyMap": {},
+  "modules": {
+    ".": {
+      "name": "",
+      "dependencies": {},
+      "devDependencies": {
+        "@ohos/hypium": {
+          "specifier": "1.0.19",
+          "version": "1.0.19"
+        }
+      },
+      "dynamicDependencies": {},
+      "maskedByOverrideDependencyMap": false
+    },
+    "entry": {
+      "name": "entry",
+      "dependencies": {
+        "sherpa_onnx": {
+          "specifier": "1.13.2",
+          "version": "1.13.2"
+        }
+      },
+      "devDependencies": {},
+      "dynamicDependencies": {},
+      "maskedByOverrideDependencyMap": false
+    }
+  },
+  "packages": {
+    "@ohos/hypium@1.0.19": {
+      "integrity": "sha512-cEjDgLFCm3cWZDeRXk7agBUkPqjWxUo6AQeiu0gEkb3J8ESqlduQLSIXeo3cCsm8U/asL7iKjF85ZyOuufAGSQ==",
+      "storePath": "oh_modules/.ohpm/@ohos+hypium@1.0.19",
+      "dependencies": {},
+      "dynamicDependencies": {},
+      "dev": true,
+      "dynamic": false,
+      "maskedByOverrideDependencyMap": false
+    },
+    "sherpa_onnx@1.13.2": {
+      "integrity": "sha512-WlMnudG5je1N0B/twNNqINFJwwxiYrBz86i30IP7JtZSQQxEnujtaQ8TuJ8JbZ3J4pUXJ9g7oxdfG55aCaYpTA==",
+      "storePath": "oh_modules/.ohpm/sherpa_onnx@1.13.2",
+      "dependencies": {
+        "libsherpa_onnx.so": "oh_modules/.ohpm/sherpa_onnx@1.13.2/oh_modules/sherpa_onnx/src/main/cpp/types/libsherpa_onnx"
+      },
+      "dynamicDependencies": {},
+      "dev": false,
+      "dynamic": false,
+      "maskedByOverrideDependencyMap": false
+    },
+    "libsherpa_onnx.so@file:oh_modules/.ohpm/sherpa_onnx@1.13.2/oh_modules/sherpa_onnx/src/main/cpp/types/libsherpa_onnx": {
+      "storePath": "oh_modules/.ohpm/sherpa_onnx@1.13.2/oh_modules/sherpa_onnx/src/main/cpp/types/libsherpa_onnx",
+      "dependencies": {},
+      "dynamicDependencies": {},
+      "dev": false,
+      "dynamic": false,
+      "maskedByOverrideDependencyMap": false
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+	"app": {
+		"bundleName": "com.k2fsa.sherpa.onnx",
+		"debug": true,
+		"versionCode": 1000000,
+		"versionName": "1.0.0",
+		"minAPIVersion": 40000010,
+		"targetAPIVersion": 50001013,
+		"apiReleaseType": "Beta3",
+		"compileSdkVersion": "5.0.1.106",
+		"compileSdkType": "HarmonyOS",
+		"appEnvironments": [],
+		"bundleType": "app"
+	},
+	"module": {
+		"name": "sherpa_onnx",
+		"type": "har",
+		"deviceTypes": [
+			"default",
+			"tablet",
+			"2in1"
+		],
+		"packageName": "sherpa_onnx",
+		"installationFree": false,
+		"virtualMachine": "ark9.0.0.0",
+		"compileMode": "esmodule",
+		"dependencies": []
+	}
+}
