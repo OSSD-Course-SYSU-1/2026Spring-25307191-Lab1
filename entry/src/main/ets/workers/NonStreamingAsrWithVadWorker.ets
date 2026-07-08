@@ -84,6 +84,14 @@ interface Wave {
 }
 
 function decodeFile(filename: string): string {
+  // 添加初始化检查
+  if (!vad) {
+    return 'VAD 未初始化，请先初始化 VAD';
+  }
+  if (!recognizer) {
+    return '识别器未初始化，请先初始化 ASR';
+  }
+
   vad.reset();
 
   const fp = fileIo.openSync(filename);
@@ -145,36 +153,53 @@ function decodeFile(filename: string): string {
     }
   }
 
-  return resultList.join('\n\n');
+  const result = resultList.join('\n\n');
+  // 如果没有识别到语音，返回提示消息
+  if (result === '') {
+    return '未识别到语音内容，请检查音频文件是否包含有效语音。';
+  }
+  return result;
 }
 
-function decodeMic(samples: Float32Array) {
+function decodeMic(samples: Float32Array): string {
+  // 添加初始化检查
+  if (!vadMic) {
+    return '麦克风 VAD 未初始化，请先初始化 VAD';
+  }
+  if (!recognizer) {
+    return '识别器未初始化，请先初始化 ASR';
+  }
+
   const resultList: string[] = [];
 
-  let windowSize: number = vad.config.sileroVad.windowSize;
+  let windowSize: number = vadMic.config.sileroVad.windowSize;
 
-  if (vad.config.tenVad.model != '') {
-    windowSize = vad.config.tenVad.windowSize;
+  if (vadMic.config.tenVad.model != '') {
+    windowSize = vadMic.config.tenVad.windowSize;
   }
 
   for (let i = 0; i < samples.length; i += windowSize) {
     const thisWindow: Float32Array = samples.subarray(i, i + windowSize)
-    vad.acceptWaveform(thisWindow);
+    vadMic.acceptWaveform(thisWindow);
     if (i + windowSize >= samples.length) {
-      vad.flush();
+      vadMic.flush();
     }
-    while (!vad.isEmpty()) {
-      const segment: SpeechSegment = vad.front();
+    while (!vadMic.isEmpty()) {
+      const segment: SpeechSegment = vadMic.front();
       const _startTime: number = (segment.start / 16000);
       const _endTime: number = _startTime + segment.samples.length / 16000;
 
       if (_endTime - _startTime < 0.2) {
-        vad.pop();
+        vadMic.pop();
         continue;
       }
 
       const startTime: string = _startTime.toFixed(2);
       const endTime: string = _endTime.toFixed(2);
+
+      // 添加进度消息
+      const progress: number = (segment.start + segment.samples.length) / samples.length * 100;
+      workerPort.postMessage({ 'msgType': 'non-streaming-asr-vad-mic-progress', progress });
 
       const stream: OfflineStream = recognizer.createStream();
       stream.acceptWaveform({ samples: segment.samples, sampleRate: 16000 });
@@ -187,11 +212,16 @@ function decodeMic(samples: Float32Array) {
 
       workerPort.postMessage({ 'msgType': 'non-streaming-asr-vad-mic-partial', text });
 
-      vad.pop();
+      vadMic.pop();
     }
   }
 
-  return resultList.join('\n\n');
+  const result = resultList.join('\n\n');
+  // 如果没有识别到语音，返回提示消息
+  if (result === '') {
+    return '未识别到语音内容，请检查麦克风是否正常工作。';
+  }
+  return result;
 }
 
 /**
@@ -203,25 +233,44 @@ function decodeMic(samples: Float32Array) {
 workerPort.onmessage = (e: MessageEvents) => {
   const msgType = e.data['msgType'] as string;
   console.log(`msg-type: ${msgType}`)
+  
   if (msgType == 'init-vad' && !vad) {
-    const context = e.data['context'] as Context;
-    vad = initVad(context);
-    console.log('init vad done');
-    workerPort.postMessage({ 'msgType': 'init-vad-done' });
+    try {
+      const context = e.data['context'] as Context;
+      vad = initVad(context);
+      console.log('init vad done');
+      workerPort.postMessage({ 'msgType': 'init-vad-done' });
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      console.error('init vad failed:', errorMsg);
+      workerPort.postMessage({ 'msgType': 'init-vad-error', 'error': errorMsg });
+    }
   }
 
   if (msgType == 'init-vad-mic' && !vadMic) {
-    const context = e.data['context'] as Context;
-    vadMic = initVad(context);
-    console.log('init vad mic done');
-    workerPort.postMessage({ 'msgType': 'init-vad-mic-done' });
+    try {
+      const context = e.data['context'] as Context;
+      vadMic = initVad(context);
+      console.log('init vad mic done');
+      workerPort.postMessage({ 'msgType': 'init-vad-mic-done' });
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      console.error('init vad mic failed:', errorMsg);
+      workerPort.postMessage({ 'msgType': 'init-vad-mic-error', 'error': errorMsg });
+    }
   }
 
   if (msgType == 'init-non-streaming-asr' && !recognizer) {
-    const context = e.data['context'] as Context;
-    recognizer = initNonStreamingAsr(context);
-    console.log('init non streaming ASR done');
-    workerPort.postMessage({ 'msgType': 'init-non-streaming-asr-done' });
+    try {
+      const context = e.data['context'] as Context;
+      recognizer = initNonStreamingAsr(context);
+      console.log('init non streaming ASR done');
+      workerPort.postMessage({ 'msgType': 'init-non-streaming-asr-done' });
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      console.error('init non streaming ASR failed:', errorMsg);
+      workerPort.postMessage({ 'msgType': 'init-non-streaming-asr-error', 'error': errorMsg });
+    }
   }
 
   if (msgType == 'non-streaming-asr-vad-decode') {
@@ -231,7 +280,9 @@ workerPort.onmessage = (e: MessageEvents) => {
       const text = decodeFile(filename);
       workerPort.postMessage({ msgType: 'non-streaming-asr-vad-decode-done', text });
     } catch (e) {
-      workerPort.postMessage({ msgType: 'non-streaming-asr-vad-decode-error', text: `Failed to decode ${filename}` });
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      console.error('decode file failed:', errorMsg);
+      workerPort.postMessage({ msgType: 'non-streaming-asr-vad-decode-error', text: `Failed to decode ${filename}: ${errorMsg}` });
     }
 
     workerPort.postMessage({ 'msgType': 'non-streaming-asr-vad-decode-progress', progress: 100 });
@@ -239,13 +290,18 @@ workerPort.onmessage = (e: MessageEvents) => {
 
   if (msgType == 'non-streaming-asr-vad-mic') {
     const samples: Float32Array = e.data['samples'] as Float32Array;
-    vadMic.reset();
+    if (vadMic) {
+      vadMic.reset();
+    }
     try {
       const text = decodeMic(samples);
       workerPort.postMessage({ msgType: 'non-streaming-asr-vad-mic-done', text });
     } catch (e) {
-      workerPort.postMessage({ msgType: 'non-streaming-asr-vad-mic-error', text: `Failed to decode` });
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      console.error('decode mic failed:', errorMsg);
+      workerPort.postMessage({ msgType: 'non-streaming-asr-vad-mic-error', text: `Failed to decode: ${errorMsg}` });
     }
+    workerPort.postMessage({ 'msgType': 'non-streaming-asr-vad-mic-progress', progress: 100 });
   }
 }
 

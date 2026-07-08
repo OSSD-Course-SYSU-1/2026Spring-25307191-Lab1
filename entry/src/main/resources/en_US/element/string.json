@@ -15,6 +15,10 @@
     {
       "name": "mic_reason",
       "value": "access the microphone for on-device speech recognition with Next-gen Kaldi"
+    },
+    {
+      "name": "network_info_reason",
+      "value": "获取网络信息以支持语音识别功能"
     }
   ]
 }

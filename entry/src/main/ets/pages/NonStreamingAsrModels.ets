@@ -17,12 +17,11 @@ export function getOfflineModelConfig(type: number): OfflineModelConfig {
 
     case 1: {
       const modelDir = 'icefall-asr-multidataset-pruned_transducer_stateless7-2023-05-04'
-      c.transducer.encoder = `$modelDir}/encoder-epoch-30-avg-4.int8.onnx`;
+      c.transducer.encoder = `${modelDir}/encoder-epoch-30-avg-4.int8.onnx`;
       c.transducer.decoder = `${modelDir}/decoder-epoch-30-avg-4.onnx`;
-      c.transducer.encoder = `${modelDir}/joiner-epoch-30-avg-4.onnx`;
+      c.transducer.joiner = `${modelDir}/joiner-epoch-30-avg-4.onnx`;  // ← 修复这里
       c.tokens = `${modelDir}/tokens.txt`;
       c.modelType = "transducer";
-
       break;
     }
 
@@ -110,7 +109,7 @@ export function getOfflineModelConfig(type: number): OfflineModelConfig {
 
     case 11: {
       const modelDir = "sherpa-onnx-telespeech-ctc-int8-zh-2024-06-04"
-      c.telespeechCtc = `${modelDir}/model.int8.onnx`;
+      c.telespeechCtc  = `${modelDir}/model.int8.onnx`;
       c.tokens = `${modelDir}/tokens.txt`;
       c.modelType = "telespeech_ctc";
 
