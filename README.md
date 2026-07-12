@@ -21,6 +21,7 @@
 - sherpa-onnx 三方库
 
 ## 项目结构
+
 ```
 entry/src/main/ets/
 ├── common/                     # 公共层
@@ -34,6 +35,8 @@ entry/src/main/ets/
 │   └── models/                 # 数据模型层
 ├── pages/
 │   └── Index.ets               # 主页面 (GridRow 响应式布局)
+├── utils/
+│   └── LingvaTranslator.ets    # 翻译工具类 (新增)
 ├── entryability/
 │   └── EntryAbility.ets        # 入口 Ability + 分布式流转
 └── workers/
@@ -41,6 +44,7 @@ entry/src/main/ets/
     ├── NonStreamingAsrModels.ets         # 模型配置 (23 种)
     └── Permission.ets                    # 权限申请
 ```
+    
     
 
 
