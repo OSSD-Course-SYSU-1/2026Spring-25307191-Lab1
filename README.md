@@ -101,7 +101,7 @@ entry/src/main/ets/
 - 🇵🇹 Português
 - 🇮🇹 Italiano
 
-![翻译语言选择](docs/images/translation-dropdown-preview.png)
+![翻译语言选择](docs/translation-dropdown-preview.png)
 
 ### 2. 麦克风实时识别 + 翻译预览
 
@@ -111,7 +111,7 @@ entry/src/main/ets/
 - 翻译目标语言选择
 - 复制 / 清空快捷操作
 
-![麦克风识别与翻译](docs/images/mic-translation-preview.png)
+![麦克风识别与翻译](docs/mic-translation-preview.png)
 
 ## 使用说明
 
